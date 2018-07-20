@@ -1,0 +1,250 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+                                        Project
+                          Statistical Learning with R (STAT 6620)
+                                    Prof. Eric A Suess
+
+
+
+
+
+
+
+
+
+
+                                        Submitted By
+                                  Priyanka Ramesh Nayak
+                                          
+                                          
+                                          
+                                          
+
+#Project Proposal
+
+The data set is Titanic Dataset. The dataset is collected from kaggel https://www.kaggle.com/c/titanic/data
+The data has been split into two groups:
+.	training set (train.csv)
+.	test set (test.csv)
+The training set should be used to build your machine learning models. For the training set, we provide the outcome (also known as the "ground truth") for each passenger. 
+The test set should be used to see how well your model performs on unseen data. For the test set, we do not provide the ground truth for each passenger.
+We were given 891 passenger samples for our training set and their associated labels of whether or
+not the passenger survived. For each passenger, we were given his/her passenger class, name, sex, age, number ofsiblings/spouses aboard, number of parents/children aboard, ticket number, fare, cabin embarked, and port of
+embarkation. For the test data, we had 418 samples in the same format.
+We can use Na�ve Bayes Classification algorithm to predict whether or not the passengers survived the sinking of the Titanic depending on the different Class,Sex and Age. Bayes' theorem can be used to make prediction based on prior knowledge and current evidence.
+We can also use logistic Regression on survival Survival 0 = No, 1 = Yes.
+In this project i have used Naive Baeys Classification algorithm to predict the surival of passengers in the sinking of Titanic dependng on Class,Sex and Age.
+
+
+
+#Step 1: Collecting Data
+The  Titanic dataset was collected from kaggel  by www.kaggle.com, Using data provided our goal is to
+apply machine-learning techniques to successfully predict which passengers survived the sinking of the Titanic.
+Features like ticket price, age, sex, and class will be used to make the predictions. We take several approaches to this problem in order to compare and contrast the different machine learning techniques. In this project i have used Naive Baeys algorithm to predict the survival.
+Naïve Bayes classification is a kind of simple probabilistic classification methods based on Bayes' theorem with the assumption of independence between features. The model is trained on training dataset to make predictions by predict() function. This article introduces two functions naiveBayes() and train() for the performance of Naïve Bayes classification.
+
+#Step 2: Exploring and preparing the data
+The first step in constructing the classifier is to import the data and saving it.
+
+```{r}
+library(e1071)
+Titanictrain <- read.csv("train.csv", stringsAsFactors = FALSE)
+Titanictest<-read.csv("test.csv", stringsAsFactors = FALSE)
+
+
+```
+The str() function  of test data shows that the data has a total of 418 observations with 11 variables.
+```{r}
+str(Titanictest)
+```
+The str() function  of train  data shows that the data has a total of 891 observations with 12 variables.
+```{r}
+str(Titanictrain)
+```
+
+
+```{r}
+titanicdata<-naiveBayes(as.factor(Survived)~., Titanictrain)
+str(titanicdata)
+###Relabelling some categorical variables
+####Survived
+Titanictrain$Survived[Titanictrain$Survived==0]="Not survived"
+Titanictrain$Survived[Titanictrain$Survived==1]="Survived"
+
+table(Titanictrain$Survived)
+```
+#Number of survivals and non-survivals by Gender
+
+```{r}
+table(Titanictrain$Survived,Titanictrain$Sex)
+
+```
+
+###Number of survivals and non-survivals by Class###
+```{r}
+table(Titanictrain$Survived,Titanictrain$Pclass)
+
+```
+
+
+```{r}
+table(Titanictrain$Survived,Titanictrain$Embarked)
+```
+```{r}
+table(Titanictrain$Survived,Titanictrain$Age)
+```
+
+#visulization of the data
+#Frequency plot of survivals and non-survivals
+A Bar Plot is a way to visualize Frequency plot of survivals and non-survivals
+```{r}
+barplot(table(Titanictrain$Survived),col=c("red","green"),main="Frequency plot of Survivals",xlab="Survival",ylab="Number of passengers")
+```
+#Frequency plot of survivals and non-survivals by Gender
+
+```{r}
+barplot(table(Titanictrain$Survived,Titanictrain$Sex),col=c("red","green"),beside=TRUE,main="Frequency plot of Survivals by Gender",xlab="Gender",ylab="Number of passengers")
+```
+#Frequency plot of survivals and non-survivals by Class
+```{r}
+barplot(table(Titanictrain$Survived,Titanictrain$Pclass),col=c("red","blue"),beside=TRUE, main="Frequency plot of Survivals by Class",xlab="Class",ylab="Number of passengers")
+
+```
+
+#Frequency plot of survivals and non-survivals by Port of Embarkation
+
+```{r}
+barplot(table(Titanictrain$Survived,Titanictrain$Embarked),col=c("red","blue"), beside=TRUE, main="Frequency plot of Survivals by PortofEmbarkation",xlab="Embarkation",ylab="Number of passengers")
+
+
+```
+
+#Data preparation: 
+#Data Cleaning and Preparation
+
+```{r}
+
+dt=data.frame(as.factor(Titanictrain$Survived),Titanictrain[,-2])
+dt1=dt[,-2] ##Removing Passenger ID###
+dt2=dt1[,-3] ###Removing Passenger Name###
+dt3=dt2[,-7] ####Removing Ticket#####
+clean_data=dt3[,-8] ####Removing Cabin####
+varnames=names(clean_data)
+varnames=c("Survived",varnames[-1])
+colnames(clean_data)=varnames
+print("The following are the predictor variables used:")
+names(clean_data[,2:ncol(clean_data)])
+```
+
+#Model Fitting and Evaluation
+
+```{r}
+n=nrow(clean_data)
+```
+
+# creating training and test datasets
+With our data prepared for analysis, we now need to split the data into training and
+test datasets.Titanic dataset has traing and test datset but the test dataset doesnot have the surivalid.so we have to devide Testdata set as Traning dataset and Validation dataset.We'll divide the data into two portions: 75 percent for training and 25 percent for  validation data testing.
+
+```{r}
+# creating training and test datasets
+t_train <- clean_data[1:668, ]
+t_test  <- clean_data[669:891, ]
+```
+
+## Step 3: Training a model on the data ----
+we have transformed the raw titanic  training data into a format that can be represented by a statistical model, it is time to apply the Naive Bayes algorithm. The algorithm will predict the survival adn non survival of passengers in the Titanic ship.
+The Naive Bayes implementation we will employ is in the e1071 package. This package was developed in the statistics department of the Vienna University ofTechnology (TU Wien)
+```{r}
+library(e1071)
+Titanic_classifier <- naiveBayes(Survived~.,data=t_train)
+
+
+```
+
+## Step 4: Evaluating model performance ----
+To evaluate the Titanic  classifier, we need to test its predictions train data.  The classifier that we trained has been named sms_classifier.We will use this classifier to generate predictions and then compare the predicted
+values to the true values.
+The predict() function is used to make the predictions. We will store these in a vector named Titanic_test_pred We will simply supply the function with the names of our classifier and test dataset, as shown.
+
+```{r}
+Titanic_test_pred <- predict(Titanic_classifier,t_test[,-1])
+head(data.frame(Titanic_test_pred,t_test))
+
+
+```
+To compare the predictions to the true values, we'll use the CrossTable() function in the gmodels package, which we used previously. This time, we'll add some additional parameters to eliminate unnecessary cell proportions and use the dnn parameter (dimension names) to relabel the rows and columns, as shown in the following code:
+```{r}
+library(gmodels)
+CrossTable(Titanic_test_pred, t_test$Survived,prop.chisq = FALSE, prop.t = FALSE, prop.r = FALSE,
+           dnn = c('predicted', 'actual'))
+
+
+```
+The CrossTable above shows that 56 passengers were incorrectly classified in which 16 out of 141 not survived  were misidentified as survived, and 40 out of 82 Survived were misdentified as nonsurvived. 
+
+
+The accuarcy of the model can be calculated as 
+
+
+#Calculate the accuracy
+
+```{r}
+error <- mean(t_test$Survived != Titanic_test_pred) # Misclassification error
+
+paste('Accuracy',round(1-error,4))
+
+```
+#Step 5: Improving model performance
+We can try to improve the model by setting value for the laplace estimator.We'll build a Naive Bayes model as done earlier, but this time set laplace = 1.
+```{r}
+Titanic_classifier2 <- naiveBayes(Survived~.,data=t_train,laplace = 1)
+
+
+Titanic_test_pred2 <- predict(Titanic_classifier2,t_test[,-1])
+head(data.frame(Titanic_test_pred2,t_test))
+
+
+
+
+library(gmodels)
+CrossTable(Titanic_test_pred2,t_test$Survived, prop.chisq = FALSE, prop.t = FALSE, prop.r = FALSE,
+           dnn = c('predicted', 'actual'))
+
+
+
+
+```
+```{r}
+error <- mean(t_test$Survived != Titanic_test_pred2) # Misclassification error
+
+paste('Accuracy',round(1-error,4))
+
+```
+By adding laplace estimator it didnt improve the model performance.We got the same accuracy as before. 
+
+
+#Prediction using the test dataset
+```{r}
+dl1=Titanictest[,-1] ##Removing Passenger ID###
+dl2=dl1[,-2] ###Removing Passenger Name###
+dl3=dl2[,-6] ####Removing Ticket#####
+test=dl3[,-7] ####Removing Cabin####
+
+
+test$Embarked=as.character(test$Embarked)
+test$Embarked=as.factor(test$Embarked)
+yhat=predict(Titanic_classifier,test)
+pred1=data.frame(yhat,Titanictest)
+head(pred1,n=20)
+```
+
+
+
+#Conclusion
+In this project i have used Naive Baeys Classification algorithm to predict which passengers survived the sinking of the Titanic.Features like ticket price, age, sex, and class will be used to make the predictions.We got the accuracy as 75%.To improve the Model performance, used  laplace estimator there were no significant differences in accuracy.The accuracy was same as before.
